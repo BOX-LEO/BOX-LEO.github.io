@@ -143,7 +143,11 @@
       border:1px solid var(--line);
       background:rgba(0,0,0,.12);
       padding:14px 12px;
-      scroll-behavior:smooth;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
+    }
+    .lyrics::-webkit-scrollbar{
+      display:none;
     }
     .line{
       padding:10px 10px;
@@ -175,6 +179,96 @@
     }
     a{ color:var(--accent); text-decoration:none; }
     a:hover{ text-decoration:underline; }
+
+    /* Fixed bottom player bar */
+    .player-bar{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:linear-gradient(180deg, rgba(18,26,42,.97), rgba(11,15,26,.99));
+      border-top:1px solid var(--line);
+      padding:14px 20px;
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      z-index:1000;
+      box-shadow: 0 -4px 30px rgba(0,0,0,.5);
+    }
+    .player-inner{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+    .play-btn{
+      width:48px;
+      height:48px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--accent);
+      border:none;
+      color:#0b0f1a;
+      font-size:18px;
+      flex-shrink:0;
+      transition: transform .1s, background .15s;
+    }
+    .play-btn:hover{
+      background:#8fb3ff;
+      transform:scale(1.05);
+    }
+    .player-progress{
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .player-progress input[type="range"]{
+      flex:1;
+      min-width:80px;
+    }
+    .player-time{
+      font-variant-numeric: tabular-nums;
+      color:var(--muted);
+      font-size:12px;
+      min-width:90px;
+      text-align:center;
+    }
+    .player-volume{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-shrink:0;
+    }
+    .player-volume input[type="range"]{
+      width:80px;
+    }
+    .vol-icon{
+      color:var(--muted);
+      font-size:16px;
+      cursor:pointer;
+      width:20px;
+      text-align:center;
+    }
+    @media (max-width: 600px){
+      .player-inner{
+        flex-wrap:wrap;
+        gap:12px;
+      }
+      .player-progress{
+        order:3;
+        width:100%;
+      }
+      .player-volume input[type="range"]{
+        width:50px;
+      }
+    }
+    body{
+      padding-bottom:90px;
+    }
   </style>
 </head>
 
@@ -192,28 +286,12 @@
 
     <div class="card top">
       <div class="cover">
-        <!-- Put your cover at: assets/cover.jpg (or change the src). -->
         <img id="coverImg" src="assets/cover.jpg" alt="Cover" onerror="this.style.display='none'">
         <div class="controls">
-          <button id="playBtn" type="button">Play</button>
-          <button id="restartBtn" type="button">Restart</button>
           <button id="scrollBtn" type="button">Auto Scroll: On</button>
           <span class="pill" id="hint">Tip: click a lyric line to seek.</span>
         </div>
-
-        <div class="row">
-          <input id="seek" type="range" min="0" max="1000" value="0" />
-          <div class="time" id="timeLabel">0:00 / 0:00</div>
-        </div>
-
-        <div class="row">
-          <span class="pill">Volume</span>
-          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
-          <span class="pill" id="volLabel">90%</span>
-        </div>
-
-        <!-- Audio -->
-        <!-- Put your song at: assets/song.mp3 (or change the src). -->
+        <!-- Audio element (hidden, controlled by bottom player bar) -->
         <audio id="audio" preload="metadata">
           <source src="assets/song.mp3" type="audio/mpeg" />
         </audio>
@@ -230,6 +308,21 @@
     </div>
   </div>
 
+  <!-- Fixed bottom player bar -->
+  <div class="player-bar">
+    <div class="player-inner">
+      <button id="playBtn" class="play-btn" type="button">▶</button>
+      <div class="player-progress">
+        <input id="seek" type="range" min="0" max="1000" value="0" />
+        <div class="player-time" id="timeLabel">0:00 / 0:00</div>
+      </div>
+      <div class="player-volume">
+        <span class="vol-icon" id="volIcon">🔊</span>
+        <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
+      </div>
+    </div>
+  </div>
+
   <script>
     // ====== 1) EDIT THESE ======
     const META = {
@@ -241,23 +334,89 @@
     // Replace text with your lyrics.
     // Add more lines as you like.
     const LYRICS = [
-      { t: 0.0,  text: "（前奏）" },
-      { t: 8.0,  text: "我绝不会随便对待你的心啊" },
-      { t: 14.0, text: "也绝不让你受半点点委屈" },
-      { t: 20.0, text: "只要牵手身边那个人是你" },
-      { t: 26.0, text: "天南地北走到哪里都风景" },
-      { t: 34.0, text: "（副歌）绕了这么久 原来你在等我" },
-      { t: 42.0, text: "（间奏）" },
+      { t: 0.0,   text: "..." },
+      { t: 11.9,  text: "一直不敢 和你对视 也不敢 say Hi" },
+      { t: 14.9,  text: "眼神不停 闪躲 时间过的 飞快" },
+      { t: 17.9,  text: "还没和你说话 可能注定失败" },
+      { t: 20.9,  text: "不知如何挽留 你已经准备离开" },
+      { t: 23.9,  text: "那天你走后 我能量瞬间耗尽" },
+      { t: 26.9,  text: "不知你那晚 有没有玩的尽兴" },
+      { t: 29.9,  text: "明明想靠近 但一直犹豫不停" },
+      { t: 32.9,  text: "多亏你私信 才把我们距离拉近" },
+      { t: 35.9,  text: "收到了消息 是你夸我超帅" },
+      { t: 38.9,  text: "我向你坦白 有些心潮澎湃" },
+      { t: 41.9,  text: "不想再错过 你的每条动态" },
+      { t: 44.9,  text: "渐渐开始幻想有彼此的未来" },
+      { t: 47.9,  text: "默默关注你的主页 不想让你发现" },
+      { t: 50.9,  text: "社交媒体给你私信 躲在屏幕后面" },
+      { t: 53.9,  text: "下次演出尽量出现 这是你的留言" },
+      { t: 56.9,  text: "无法控制胡思乱想 期待下次相见" },
+      { t: 59.9,  text: "..." },
+      { t: 71.9,  text: "在台上 很紧张 看到你我就能放心" },
+      { t: 74.9,  text: "认识你 大半年 那天终于加上微信" },
+      { t: 77.9,  text: "你身影 太迷人 瞬间深深刻进心里" },
+      { t: 80.9,  text: "不想很 快承认 面对你我失去自信" },
+      { t: 83.9,  text: "听说你 会参加 之后的聚餐" },
+      { t: 86.9,  text: "想象着 和你打 招呼的画面" },
+      { t: 89.9,  text: "很害怕 不自觉 表现的不安" },
+      { t: 92.9,  text: "多希望 有机会 多看你一眼" },
+      { t: 95.9,  text: "时间 一天一天 终于和你见面" },
+      { t: 98.9,  text: "不想 被你发现 我闪躲的视线" },
+      { t: 101.9, text: "给你 倒杯橙汁 隐藏嘴角弧线" },
+      { t: 104.9, text: "游戏 加速时间 转眼已到三点" },
+      { t: 107.9, text: "..." },
+      { t: 131.9, text: "那天起 我们的 沟通和交流都 逐渐变得频繁" },
+      { t: 134.9, text: "只想让 你尽快 了解我不常见 最真实的一面" },
+      { t: 137.9, text: "不刻意 不虚伪 没客套没暧昧 有些口无遮拦" },
+      { t: 140.9, text: "所有话 不掩饰 不说谎不隐藏 希望你能喜欢" },
+      { t: 143.9, text: "一直盯着手机屏幕 不需要睡觉吃饭" },
+      { t: 146.9, text: "精神世界保持共鸣 听你推荐的歌单" },
+      { t: 149.9, text: "保持真实没有技巧 全都靠真情实感" },
+      { t: 152.9, text: "可以勇敢做我自己 这就是新的起点" },
+      { t: 155.9, text: "Yeah Yeah 话题变得深入" },
+      { t: 158.9, text: "Yeah Yeah 心事向你倾诉" },
+      { t: 161.9, text: "Yeah Yeah 了解来时的路" },
+      { t: 164.9, text: "内心世界丰富-是你特有的天赋" },
+      { t: 167.9, text: "早就想说 你的眼睛 很迷人" },
+      { t: 170.9, text: "它装着 世间万物和星辰" },
+      { t: 173.9, text: "不知不觉 为你灵魂 沉沦" },
+      { t: 176.9, text: "里面是 高洁纯净的精神" },
+      { t: 179.9, text: "知道你不认路 添加你的findmy" },
+      { t: 182.9, text: "不希望有意外 掌握你的动态" },
+      { t: 185.9, text: "接送机交给我 航班号都拿来" },
+      { t: 188.9, text: "秘密开始策划 把我内心表白" },
+      { t: 191.9, text: "..." },
+      { t: 215.9, text: "我不会 随随便便 对待你" },
+      { t: 218.9, text: "也不想你 受一点点 委屈" },
+      { t: 221.9, text: "每个未来 身边的人 是你" },
+      { t: 224.9, text: "天南地北 哪里都是 风景" },
+      { t: 227.9, text: "茫茫人海相遇 三生有幸" },
+      { t: 230.9, text: "渐渐开始相信 命中注定" },
+      { t: 233.9, text: "尊重自己内心 无比确信" },
+      { t: 236.9, text: "非你莫属因为 我们灵魂相契" },
+      { t: 239.9, text: "你有发现美好 的眼睛" },
+      { t: 242.9, text: "也有温暖世界 的心灵" },
+      { t: 245.9, text: "你天真浪漫还 很理性" },
+      { t: 248.9, text: "成熟包裹鲜活 温柔且坚定" },
+      { t: 251.9, text: "情歌不在 肉麻变成 生活写照" },
+      { t: 254.9, text: "我知道 你扫清所有的问号" },
+      { t: 257.9, text: "我想要 未来都是你的美貌" },
+      { t: 260.9, text: "想 简简单单爱 陪你一直到老" },
+      { t: 263.9, text: "今天是我们过的第一个情人节" },
+      { t: 266.9, text: "紧紧相拥属于彼此不会有离别" },
+      { t: 269.9, text: "清爽透彻自由纯粹保持天真无邪" },
+      { t: 272.9, text: "共同书写专属你我甜蜜的情节" },
+      { t: 275.9, text: "TO MY DEAR Sylvia" },
+      { t: 278.9, text: "I LOVE YOU" },
     ];
     // ==========================
 
     const audio = document.getElementById("audio");
     const playBtn = document.getElementById("playBtn");
-    const restartBtn = document.getElementById("restartBtn");
     const scrollBtn = document.getElementById("scrollBtn");
     const seek = document.getElementById("seek");
     const vol = document.getElementById("vol");
-    const volLabel = document.getElementById("volLabel");
+    const volIcon = document.getElementById("volIcon");
     const timeLabel = document.getElementById("timeLabel");
     const lyricsBox = document.getElementById("lyricsBox");
     const status = document.getElementById("status");
@@ -267,6 +426,7 @@
     let autoScroll = true;
     let lastActiveIndex = -1;
     let userSeeking = false;
+    let lastVolume = 0.9;
 
     songTitle.textContent = META.title;
     songSub.textContent = META.subtitle;
@@ -310,6 +470,35 @@
       return ans;
     }
 
+    // Smooth scroll with easing
+    let scrollAnimationId = null;
+    function smoothScrollTo(element, target, duration = 600) {
+      if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
+
+      const start = element.scrollTop;
+      const distance = target - start;
+      const startTime = performance.now();
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        element.scrollTop = start + distance * easeOutCubic(progress);
+
+        if (progress < 1) {
+          scrollAnimationId = requestAnimationFrame(animate);
+        } else {
+          scrollAnimationId = null;
+        }
+      }
+
+      scrollAnimationId = requestAnimationFrame(animate);
+    }
+
     function updateLyrics(t) {
       if (!LYRICS.length) return;
 
@@ -323,7 +512,12 @@
       if (children[idx]) {
         children[idx].classList.add("active");
         if (autoScroll) {
-          children[idx].scrollIntoView({ block: "center", behavior: "smooth" });
+          const lineEl = children[idx];
+          const boxHeight = lyricsBox.clientHeight;
+          const lineTop = lineEl.offsetTop;
+          const lineHeight = lineEl.offsetHeight;
+          const targetScroll = lineTop - (boxHeight / 2) + (lineHeight / 2);
+          smoothScrollTo(lyricsBox, targetScroll, 500);
         }
       }
       lastActiveIndex = idx;
@@ -353,11 +547,6 @@
       }
     });
 
-    restartBtn.addEventListener("click", async () => {
-      audio.currentTime = 0;
-      try { await audio.play(); } catch (e) {}
-    });
-
     scrollBtn.addEventListener("click", () => {
       autoScroll = !autoScroll;
       scrollBtn.textContent = `Auto Scroll: ${autoScroll ? "On" : "Off"}`;
@@ -365,8 +554,31 @@
 
     vol.addEventListener("input", () => {
       audio.volume = Number(vol.value);
-      volLabel.textContent = `${Math.round(audio.volume * 100)}%`;
+      lastVolume = audio.volume > 0 ? audio.volume : lastVolume;
+      updateVolIcon();
     });
+
+    volIcon.addEventListener("click", () => {
+      if (audio.volume > 0) {
+        lastVolume = audio.volume;
+        audio.volume = 0;
+        vol.value = "0";
+      } else {
+        audio.volume = lastVolume;
+        vol.value = String(lastVolume);
+      }
+      updateVolIcon();
+    });
+
+    function updateVolIcon() {
+      if (audio.volume === 0) {
+        volIcon.textContent = "🔇";
+      } else if (audio.volume < 0.5) {
+        volIcon.textContent = "🔉";
+      } else {
+        volIcon.textContent = "🔊";
+      }
+    }
 
     seek.addEventListener("pointerdown", () => { userSeeking = true; });
     seek.addEventListener("pointerup", () => { userSeeking = false; });
@@ -385,12 +597,12 @@
     });
 
     audio.addEventListener("play", () => {
-      playBtn.textContent = "Pause";
+      playBtn.textContent = "⏸";
       setStatus("Playing");
     });
 
     audio.addEventListener("pause", () => {
-      playBtn.textContent = "Play";
+      playBtn.textContent = "▶";
       setStatus("Paused");
     });
 
@@ -402,13 +614,13 @@
 
     audio.addEventListener("ended", () => {
       setStatus("Finished");
-      playBtn.textContent = "Play";
+      playBtn.textContent = "▶";
     });
 
     // Init
     buildLyrics();
     audio.volume = Number(vol.value);
-    volLabel.textContent = `${Math.round(audio.volume * 100)}%`;
+    updateVolIcon();
     scrollBtn.textContent = "Auto Scroll: On";
   </script>
 </body>
