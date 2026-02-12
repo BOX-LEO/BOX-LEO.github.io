@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Our Song</title>
+  <style>
+    :root{
+      --bg:#0b0f1a;
+      --card:#121a2a;
+      --text:#e8eefc;
+      --muted:#aab6d3;
+      --accent:#7aa2ff;
+      --line:rgba(255,255,255,.08);
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(122,162,255,.18), transparent 55%),
+        radial-gradient(900px 600px at 80% 30%, rgba(255,122,222,.10), transparent 60%),
+        radial-gradient(900px 700px at 50% 90%, rgba(90,255,200,.08), transparent 55%),
+        var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding:28px 16px 40px;
+      display:grid;
+      gap:16px;
+      grid-template-columns: 1fr;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    header{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:260px;
+    }
+    h1{
+      margin:0;
+      font-size:22px;
+      letter-spacing:.3px;
+    }
+    .sub{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.4;
+    }
+
+    .top{
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr;
+      align-items:stretch;
+    }
+    @media (min-width: 860px){
+      .top{ grid-template-columns: 360px 1fr; }
+    }
+
+    .cover{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .cover img{
+      width:100%;
+      aspect-ratio: 1 / 1;
+      object-fit:cover;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#0f1523;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    button{
+      appearance:none;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+      letter-spacing:.2px;
+    }
+    button:hover{ border-color:rgba(255,255,255,.18); }
+    button:active{ transform: translateY(1px); }
+
+    .pill{
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:12px;
+      background:rgba(0,0,0,.12);
+    }
+
+    .row{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:100%;
+    }
+    input[type="range"]{
+      width:100%;
+      accent-color: var(--accent);
+    }
+    .time{
+      font-variant-numeric: tabular-nums;
+      color:var(--muted);
+      font-size:12px;
+      min-width:92px;
+      text-align:right;
+    }
+
+    .lyrics{
+      height:420px;
+      overflow:auto;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.12);
+      padding:14px 12px;
+      scroll-behavior:smooth;
+    }
+    .line{
+      padding:10px 10px;
+      border-radius:12px;
+      color:var(--muted);
+      cursor:pointer;
+      user-select:none;
+      line-height:1.35;
+      transition: background .15s, color .15s, transform .15s;
+    }
+    .line:hover{
+      background:rgba(255,255,255,.05);
+      color:rgba(232,238,252,.9);
+    }
+    .line.active{
+      background:rgba(122,162,255,.16);
+      color:var(--text);
+      border:1px solid rgba(122,162,255,.35);
+      transform: translateX(2px);
+    }
+
+    .footer{
+      color:var(--muted);
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    a{ color:var(--accent); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="title">
+          <h1 id="songTitle">Our Song</h1>
+          <p class="sub" id="songSub">A small website to play one song, with rolling lyrics.</p>
+        </div>
+        <div class="pill" id="status">Ready</div>
+      </header>
+    </div>
+
+    <div class="card top">
+      <div class="cover">
+        <!-- Put your cover at: assets/cover.jpg (or change the src). -->
+        <img id="coverImg" src="assets/cover.jpg" alt="Cover" onerror="this.style.display='none'">
+        <div class="controls">
+          <button id="playBtn" type="button">Play</button>
+          <button id="restartBtn" type="button">Restart</button>
+          <button id="scrollBtn" type="button">Auto Scroll: On</button>
+          <span class="pill" id="hint">Tip: click a lyric line to seek.</span>
+        </div>
+
+        <div class="row">
+          <input id="seek" type="range" min="0" max="1000" value="0" />
+          <div class="time" id="timeLabel">0:00 / 0:00</div>
+        </div>
+
+        <div class="row">
+          <span class="pill">Volume</span>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
+          <span class="pill" id="volLabel">90%</span>
+        </div>
+
+        <!-- Audio -->
+        <!-- Put your song at: assets/song.mp3 (or change the src). -->
+        <audio id="audio" preload="metadata">
+          <source src="assets/song.mp3" type="audio/mpeg" />
+        </audio>
+      </div>
+
+      <div>
+        <div class="lyrics" id="lyricsBox" aria-label="Rolling lyrics"></div>
+      </div>
+    </div>
+
+    <div class="card footer">
+      <div>Host: GitHub Pages. Files: index.html + assets/song.mp3.</div>
+      <div>Edit lyrics timestamps inside this file.</div>
+    </div>
+  </div>
+
+  <script>
+    // ====== 1) EDIT THESE ======
+    const META = {
+      title: "命中注定",
+      subtitle: "写给你的一首歌",
+    };
+
+    // Timestamps are in seconds.
+    // Replace text with your lyrics.
+    // Add more lines as you like.
+    const LYRICS = [
+      { t: 0.0,  text: "（前奏）" },
+      { t: 8.0,  text: "我绝不会随便对待你的心啊" },
+      { t: 14.0, text: "也绝不让你受半点点委屈" },
+      { t: 20.0, text: "只要牵手身边那个人是你" },
+      { t: 26.0, text: "天南地北走到哪里都风景" },
+      { t: 34.0, text: "（副歌）绕了这么久 原来你在等我" },
+      { t: 42.0, text: "（间奏）" },
+    ];
+    // ==========================
+
+    const audio = document.getElementById("audio");
+    const playBtn = document.getElementById("playBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const scrollBtn = document.getElementById("scrollBtn");
+    const seek = document.getElementById("seek");
+    const vol = document.getElementById("vol");
+    const volLabel = document.getElementById("volLabel");
+    const timeLabel = document.getElementById("timeLabel");
+    const lyricsBox = document.getElementById("lyricsBox");
+    const status = document.getElementById("status");
+    const songTitle = document.getElementById("songTitle");
+    const songSub = document.getElementById("songSub");
+
+    let autoScroll = true;
+    let lastActiveIndex = -1;
+    let userSeeking = false;
+
+    songTitle.textContent = META.title;
+    songSub.textContent = META.subtitle;
+
+    function fmtTime(s) {
+      if (!isFinite(s)) return "0:00";
+      s = Math.max(0, Math.floor(s));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return `${m}:${String(r).padStart(2, "0")}`;
+    }
+
+    function setStatus(txt) {
+      status.textContent = txt;
+    }
+
+    function buildLyrics() {
+      lyricsBox.innerHTML = "";
+      LYRICS.forEach((line, i) => {
+        const div = document.createElement("div");
+        div.className = "line";
+        div.dataset.index = String(i);
+        div.dataset.time = String(line.t);
+        div.textContent = line.text;
+        div.addEventListener("click", () => {
+          audio.currentTime = Math.max(0, line.t);
+          if (audio.paused) audio.play().catch(() => {});
+        });
+        lyricsBox.appendChild(div);
+      });
+    }
+
+    function activeLineIndex(t) {
+      // Find last line with time <= t
+      let lo = 0, hi = LYRICS.length - 1, ans = 0;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (LYRICS[mid].t <= t) { ans = mid; lo = mid + 1; }
+        else { hi = mid - 1; }
+      }
+      return ans;
+    }
+
+    function updateLyrics(t) {
+      if (!LYRICS.length) return;
+
+      const idx = activeLineIndex(t);
+      if (idx === lastActiveIndex) return;
+
+      const children = lyricsBox.children;
+      if (lastActiveIndex >= 0 && children[lastActiveIndex]) {
+        children[lastActiveIndex].classList.remove("active");
+      }
+      if (children[idx]) {
+        children[idx].classList.add("active");
+        if (autoScroll) {
+          children[idx].scrollIntoView({ block: "center", behavior: "smooth" });
+        }
+      }
+      lastActiveIndex = idx;
+    }
+
+    function updateSeek() {
+      if (!audio.duration || userSeeking) return;
+      const v = Math.round((audio.currentTime / audio.duration) * 1000);
+      seek.value = String(Math.max(0, Math.min(1000, v)));
+    }
+
+    function updateTimeLabel() {
+      timeLabel.textContent = `${fmtTime(audio.currentTime)} / ${fmtTime(audio.duration)}`;
+    }
+
+    // Events
+    playBtn.addEventListener("click", async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+        } catch (e) {
+          setStatus("Tap again to allow audio.");
+          return;
+        }
+      } else {
+        audio.pause();
+      }
+    });
+
+    restartBtn.addEventListener("click", async () => {
+      audio.currentTime = 0;
+      try { await audio.play(); } catch (e) {}
+    });
+
+    scrollBtn.addEventListener("click", () => {
+      autoScroll = !autoScroll;
+      scrollBtn.textContent = `Auto Scroll: ${autoScroll ? "On" : "Off"}`;
+    });
+
+    vol.addEventListener("input", () => {
+      audio.volume = Number(vol.value);
+      volLabel.textContent = `${Math.round(audio.volume * 100)}%`;
+    });
+
+    seek.addEventListener("pointerdown", () => { userSeeking = true; });
+    seek.addEventListener("pointerup", () => { userSeeking = false; });
+
+    seek.addEventListener("input", () => {
+      if (!audio.duration) return;
+      const ratio = Number(seek.value) / 1000;
+      audio.currentTime = ratio * audio.duration;
+      updateTimeLabel();
+      updateLyrics(audio.currentTime);
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+      setStatus("Loaded");
+      updateTimeLabel();
+    });
+
+    audio.addEventListener("play", () => {
+      playBtn.textContent = "Pause";
+      setStatus("Playing");
+    });
+
+    audio.addEventListener("pause", () => {
+      playBtn.textContent = "Play";
+      setStatus("Paused");
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      updateSeek();
+      updateTimeLabel();
+      updateLyrics(audio.currentTime);
+    });
+
+    audio.addEventListener("ended", () => {
+      setStatus("Finished");
+      playBtn.textContent = "Play";
+    });
+
+    // Init
+    buildLyrics();
+    audio.volume = Number(vol.value);
+    volLabel.textContent = `${Math.round(audio.volume * 100)}%`;
+    scrollBtn.textContent = "Auto Scroll: On";
+  </script>
+</body>
+</html>
