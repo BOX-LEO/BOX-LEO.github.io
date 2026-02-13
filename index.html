@@ -10,23 +10,41 @@
       --card:#121a2a;
       --text:#e8eefc;
       --muted:#aab6d3;
-      --accent:#7aa2ff;
+      --accent:#ff7eb3;
       --line:rgba(255,255,255,.08);
     }
     *{ box-sizing:border-box; }
+
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
     body{
       margin:0;
       min-height:100vh;
       color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(122,162,255,.18), transparent 55%),
-        radial-gradient(900px 600px at 80% 30%, rgba(255,122,222,.10), transparent 60%),
-        radial-gradient(900px 700px at 50% 90%, rgba(90,255,200,.08), transparent 55%),
-        var(--bg);
+      background: url('assets/background.JPG') center center / cover no-repeat fixed;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      pointer-events: none;
+      z-index: -1;
+    }
     .wrap{
-      max-width:980px;
+      max-width:640px;
       margin:0 auto;
       padding:28px 16px 40px;
       display:grid;
@@ -40,22 +58,25 @@
       padding:18px;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
+    .card.top{
+      padding:18px 14px;
+    }
     header{
       display:flex;
-      gap:14px;
+      flex-direction:column;
+      gap:8px;
       align-items:center;
-      justify-content:space-between;
-      flex-wrap:wrap;
+      text-align:center;
     }
     .title{
       display:flex;
       flex-direction:column;
       gap:6px;
-      min-width:260px;
+      align-items:center;
     }
     h1{
       margin:0;
-      font-size:22px;
+      font-size:26px;
       letter-spacing:.3px;
     }
     .sub{
@@ -66,33 +87,30 @@
     }
 
     .top{
-      display:grid;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
       gap:14px;
-      grid-template-columns: 1fr;
-      align-items:stretch;
-    }
-    @media (min-width: 860px){
-      .top{ grid-template-columns: 360px 1fr; }
     }
 
     .cover{
+      display:none;
+    }
+
+    .lyrics-wrapper{
       display:flex;
       flex-direction:column;
-      gap:12px;
-    }
-    .cover img{
+      align-items:center;
+      gap:14px;
       width:100%;
-      aspect-ratio: 1 / 1;
-      object-fit:cover;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:#0f1523;
+      max-width:600px;
     }
 
     .controls{
       display:flex;
       gap:10px;
       align-items:center;
+      justify-content:center;
       flex-wrap:wrap;
     }
     button{
@@ -138,13 +156,16 @@
 
     .lyrics{
       height:420px;
+      width:100%;
       overflow:auto;
       border-radius:16px;
       border:1px solid var(--line);
       background:rgba(0,0,0,.12);
-      padding:14px 12px;
+      padding:60px 12px;
       scrollbar-width:none;
       -ms-overflow-style:none;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
     }
     .lyrics::-webkit-scrollbar{
       display:none;
@@ -156,17 +177,27 @@
       cursor:pointer;
       user-select:none;
       line-height:1.35;
-      transition: background .15s, color .15s, transform .15s;
+      text-align:center;
+      transition: background .3s, color .3s, transform .3s, opacity .4s;
+      opacity: 0.4;
     }
     .line:hover{
       background:rgba(255,255,255,.05);
       color:rgba(232,238,252,.9);
+      opacity: 0.8;
     }
     .line.active{
-      background:rgba(122,162,255,.16);
+      background:rgba(255,126,179,.16);
       color:var(--text);
-      border:1px solid rgba(122,162,255,.35);
-      transform: translateX(2px);
+      border:1px solid rgba(255,126,179,.35);
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    .line.near-1{
+      opacity: 0.75;
+    }
+    .line.near-2{
+      opacity: 0.55;
     }
 
     .footer{
@@ -183,23 +214,24 @@
     /* Fixed bottom player bar */
     .player-bar{
       position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
-      background:linear-gradient(180deg, rgba(18,26,42,.97), rgba(11,15,26,.99));
-      border-top:1px solid var(--line);
-      padding:14px 20px;
+      bottom:16px;
+      left:50%;
+      transform:translateX(-50%);
+      width:calc(100% - 32px);
+      max-width:640px;
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px 18px;
       backdrop-filter:blur(16px);
       -webkit-backdrop-filter:blur(16px);
       z-index:1000;
-      box-shadow: 0 -4px 30px rgba(0,0,0,.5);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
     .player-inner{
-      max-width:980px;
-      margin:0 auto;
       display:flex;
       align-items:center;
-      gap:20px;
+      gap:16px;
     }
     .play-btn{
       width:48px;
@@ -216,7 +248,7 @@
       transition: transform .1s, background .15s;
     }
     .play-btn:hover{
-      background:#8fb3ff;
+      background:#ff9ec4;
       transform:scale(1.05);
     }
     .player-progress{
@@ -248,10 +280,16 @@
     }
     .vol-icon{
       color:var(--muted);
-      font-size:16px;
       cursor:pointer;
-      width:20px;
-      text-align:center;
+      width:18px;
+      height:18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+    .vol-icon svg{
+      display:block;
     }
     @media (max-width: 600px){
       .player-inner{
@@ -271,6 +309,19 @@
     }
   </style>
 </head>
+<div id="particles-js" style="position:fixed; inset:0; z-index:-1;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+<script>
+particlesJS("particles-js", {
+  particles: {
+    number: { value: 70 },
+    size: { value: 2 },
+    move: { speed: 1 },
+    line_linked: { enable: true, opacity: 0.2 }
+  }
+});
+</script>
 
 <body>
   <div class="wrap">
@@ -280,26 +331,22 @@
           <h1 id="songTitle">Our Song</h1>
           <p class="sub" id="songSub">A small website to play one song, with rolling lyrics.</p>
         </div>
-        <div class="pill" id="status">Ready</div>
+        <!-- <div class="pill" id="status">Ready</div> -->
       </header>
     </div>
 
     <div class="card top">
-      <div class="cover">
-        <img id="coverImg" src="assets/cover.jpg" alt="Cover" onerror="this.style.display='none'">
+      <div class="lyrics-wrapper">
+        <div class="lyrics" id="lyricsBox" aria-label="Rolling lyrics"></div>
         <div class="controls">
           <button id="scrollBtn" type="button">Auto Scroll: On</button>
           <span class="pill" id="hint">Tip: click a lyric line to seek.</span>
         </div>
-        <!-- Audio element (hidden, controlled by bottom player bar) -->
-        <audio id="audio" preload="metadata">
-          <source src="assets/song.mp3" type="audio/mpeg" />
-        </audio>
       </div>
-
-      <div>
-        <div class="lyrics" id="lyricsBox" aria-label="Rolling lyrics"></div>
-      </div>
+      <!-- Audio element (hidden) -->
+      <audio id="audio" preload="metadata">
+        <source src="assets/song.mp3" type="audio/mpeg" />
+      </audio>
     </div>
 
     <div class="card footer">
@@ -317,7 +364,7 @@
         <div class="player-time" id="timeLabel">0:00 / 0:00</div>
       </div>
       <div class="player-volume">
-        <span class="vol-icon" id="volIcon">🔊</span>
+        <span class="vol-icon" id="volIcon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span>
         <input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" />
       </div>
     </div>
@@ -326,7 +373,7 @@
   <script>
     // ====== 1) EDIT THESE ======
     const META = {
-      title: "code214",
+      title: "Code26_214",
       subtitle: "",
     };
 
@@ -335,79 +382,85 @@
     // Add more lines as you like.
     const LYRICS = [
       { t: 0.0,   text: "..." },
-      { t: 11.9,  text: "一直不敢 和你对视 也不敢 say Hi" },
-      { t: 14.9,  text: "眼神不停 闪躲 时间过的 飞快" },
-      { t: 17.9,  text: "还没和你说话 可能注定失败" },
-      { t: 20.9,  text: "不知如何挽留 你已经准备离开" },
-      { t: 23.9,  text: "那天你走后 我能量瞬间耗尽" },
-      { t: 26.9,  text: "不知你那晚 有没有玩的尽兴" },
-      { t: 29.9,  text: "明明想靠近 但一直犹豫不停" },
-      { t: 32.9,  text: "多亏你私信 才把我们距离拉近" },
-      { t: 35.9,  text: "收到了消息 是你夸我超帅" },
-      { t: 38.9,  text: "我向你坦白 有些心潮澎湃" },
-      { t: 41.9,  text: "不想再错过 你的每条动态" },
+      { t: 11.9,  text: "一直不敢和你对视也不敢say Hi" },
+      { t: 14.9,  text: "眼神不停闪躲时间过的飞快" },
+      { t: 17.9,  text: "还没和你说话可能注定失败" },
+      { t: 20.9,  text: "不知如何挽留你已经准备离开" },
+      { t: 23.9,  text: "那天你走后我能量瞬间耗尽" },
+      { t: 26.9,  text: "不知你那晚有没有玩的尽兴" },
+      { t: 29.9,  text: "明明想靠近但一直犹豫不停" },
+      { t: 32.9,  text: "多亏你私信才把我们距离拉近" },
+      { t: 35.9,  text: "收到了消息是你夸我超帅" },
+      { t: 38.9,  text: "我向你坦白有些心潮澎湃" },
+      { t: 41.9,  text: "不想再错过你的每条动态" },
       { t: 44.9,  text: "渐渐开始幻想有彼此的未来" },
-      { t: 47.9,  text: "默默关注你的主页 不想让你发现" },
-      { t: 50.9,  text: "社交媒体给你私信 躲在屏幕后面" },
-      { t: 53.9,  text: "下次演出尽量出现 这是你的留言" },
-      { t: 56.9,  text: "无法控制胡思乱想 期待下次相见" },
+      { t: 47.9,  text: "默默关注你的主页不想让你发现" },
+      { t: 50.9,  text: "社交媒体给你私信躲在屏幕后面" },
+      { t: 53.9,  text: "下次演出尽量出现这是你的留言" },
+      { t: 56.9,  text: "无法控制胡思乱想期待下次相见" },
       { t: 59.9,  text: "..." },
-      { t: 71.9,  text: "在台上 很紧张 看到你我就能放心" },
-      { t: 74.9,  text: "认识你 大半年 那天终于加上微信" },
-      { t: 77.9,  text: "你身影 太迷人 瞬间深深刻进心里" },
-      { t: 80.9,  text: "不想很 快承认 面对你我失去自信" },
-      { t: 83.9,  text: "听说你 会参加 之后的聚餐" },
-      { t: 86.9,  text: "想象着 和你打 招呼的画面" },
-      { t: 89.9,  text: "很害怕 不自觉 表现的不安" },
-      { t: 92.9,  text: "多希望 有机会 多看你一眼" },
-      { t: 95.9,  text: "时间 一天一天 终于和你见面" },
-      { t: 98.9,  text: "不想 被你发现 我闪躲的视线" },
-      { t: 101.9, text: "给你 倒杯橙汁 隐藏嘴角弧线" },
-      { t: 104.9, text: "游戏 加速时间 转眼已到三点" },
+      { t: 71.9,  text: "在台上很紧张看到你我就能放心" },
+      { t: 74.9,  text: "认识你大半年那天终于加上微信" },
+      { t: 77.9,  text: "你身影太迷人瞬间深深刻进心里" },
+      { t: 80.9,  text: "不想很快承认面对你我失去自信" },
+      { t: 83.9,  text: "听说你会参加之后的聚餐" },
+      { t: 86.9,  text: "想象着和你打招呼的画面" },
+      { t: 89.9,  text: "很害怕不自觉表现的不安" },
+      { t: 92.9,  text: "多希望有机会多看你一眼" },
+      { t: 95.9,  text: "时间一天一天终于和你见面" },
+      { t: 98.9,  text: "不想被你发现我闪躲的视线" },
+      { t: 101.9, text: "给你倒杯橙汁隐藏嘴角弧线" },
+      { t: 104.9, text: "游戏加速时间转眼已到三点" },
       { t: 107.9, text: "..." },
-      { t: 131.9, text: "那天起 我们的 沟通和交流都 逐渐变得频繁" },
-      { t: 134.9, text: "只想让 你尽快 了解我不常见 最真实的一面" },
-      { t: 137.9, text: "不刻意 不虚伪 没客套没暧昧 有些口无遮拦" },
-      { t: 140.9, text: "所有话 不掩饰 不说谎不隐藏 希望你能喜欢" },
-      { t: 143.9, text: "一直盯着手机屏幕 不需要睡觉吃饭" },
-      { t: 146.9, text: "精神世界保持共鸣 听你推荐的歌单" },
-      { t: 149.9, text: "保持真实没有技巧 全都靠真情实感" },
+      { t: 131.9, text: "那天起我们的沟通和交流都 逐渐变得频繁" },
+      { t: 134.9, text: "只想让你尽快了解我不常见 最真实的一面" },
+      { t: 137.9, text: "所有话不隐藏不掩饰不说谎 有些口无遮拦" },
+      { t: 140.9, text: "不客套不暧昧不刻意不虚伪 希望你能喜欢" },
+      { t: 143.9, text: "一直盯着手机屏幕不需要睡觉吃饭" },
+      { t: 146.9, text: "精神世界保持共鸣听你推荐的歌单" },
+      { t: 149.9, text: "保持真实没有技巧全都靠真情实感" },
       { t: 152.9, text: "可以勇敢做我自己 这就是新的起点" },
       { t: 155.9, text: "Yeah Yeah 话题变得深入" },
       { t: 158.9, text: "Yeah Yeah 心事向你倾诉" },
       { t: 161.9, text: "Yeah Yeah 了解来时的路" },
       { t: 164.9, text: "内心世界丰富-是你特有的天赋" },
-      { t: 167.9, text: "早就想说 你的眼睛 很迷人" },
-      { t: 170.9, text: "它装着 世间万物和星辰" },
-      { t: 173.9, text: "不知不觉 为你灵魂 沉沦" },
-      { t: 176.9, text: "里面是 高洁纯净的精神" },
+      { t: 167.9, text: "早就想说你的眼睛很迷人" },
+      { t: 170.9, text: "它装着世间万物和星辰" },
+      { t: 173.9, text: "不知不觉为你灵魂沉沦" },
+      { t: 176.9, text: "里面是高洁纯净的精神" },
       { t: 179.9, text: "知道你不认路 添加你的findmy" },
       { t: 182.9, text: "不希望有意外 掌握你的动态" },
       { t: 185.9, text: "接送机交给我 航班号都拿来" },
       { t: 188.9, text: "秘密开始策划 把我内心表白" },
       { t: 191.9, text: "..." },
-      { t: 215.9, text: "我不会 随随便便 对待你" },
-      { t: 218.9, text: "也不想你 受一点点 委屈" },
-      { t: 221.9, text: "每个未来 身边的人 是你" },
-      { t: 224.9, text: "天南地北 哪里都是 风景" },
+      { t: 215.9, text: "我不会随随便便对待你" },
+      { t: 218.9, text: "也不想你受一点点委屈" },
+      { t: 221.9, text: "每个未来身边的人是你" },
+      { t: 224.9, text: "天南地北哪里都是风景" },
       { t: 227.9, text: "茫茫人海相遇 三生有幸" },
       { t: 230.9, text: "渐渐开始相信 命中注定" },
       { t: 233.9, text: "尊重自己内心 无比确信" },
-      { t: 236.9, text: "非你莫属因为 我们灵魂相契" },
-      { t: 239.9, text: "你有发现美好 的眼睛" },
-      { t: 242.9, text: "也有温暖世界 的心灵" },
-      { t: 245.9, text: "你天真浪漫还 很理性" },
-      { t: 248.9, text: "成熟包裹鲜活 温柔且坚定" },
-      { t: 251.9, text: "情歌不在 肉麻变成 生活写照" },
-      { t: 254.9, text: "我知道 你扫清所有的问号" },
-      { t: 257.9, text: "我想要 未来都是你的美貌" },
-      { t: 260.9, text: "想 简简单单爱 陪你一直到老" },
+      { t: 236.9, text: "非你莫属因为我们灵魂相契" },
+      { t: 239.9, text: "你有发现美好的眼睛" },
+      { t: 242.9, text: "也有温暖世界的心灵" },
+      { t: 245.9, text: "你天真浪漫还很理性" },
+      { t: 248.9, text: "成熟包裹鲜活温柔且坚定" },
+      { t: 251.9, text: "情歌不再肉麻变成生活写照" },
+      { t: 254.9, text: "我知道你扫清所有的问号" },
+      { t: 257.9, text: "我想要未来都是你的美貌" },
+      { t: 260.9, text: "想简简单单爱陪你一直到老" },
       { t: 263.9, text: "今天是我们过的第一个情人节" },
       { t: 266.9, text: "紧紧相拥属于彼此不会有离别" },
       { t: 269.9, text: "清爽透彻自由纯粹保持天真无邪" },
       { t: 272.9, text: "共同书写专属你我甜蜜的情节" },
-      { t: 275.9, text: "TO MY DEAR Sylvia" },
-      { t: 278.9, text: "I LOVE YOU" },
+      { t: 275.9, text: "To My Destined Love" },
+      { t: 278.9, text: "My dear Sylvia" },
+      { t: 281.9, text: "I cherish being with you" },
+      { t: 284.9, text: "Your world is pure and beautiful." },
+      { t: 287.9, text: "I want to love you well" },
+      { t: 290.9, text: "And be better and stronger" },
+      { t: 293.9, text: "Happy our first Valentine’s day" },
+      { t: 296.9, text: "I LOVE YOU" },
     ];
     // ==========================
 
@@ -419,7 +472,7 @@
     const volIcon = document.getElementById("volIcon");
     const timeLabel = document.getElementById("timeLabel");
     const lyricsBox = document.getElementById("lyricsBox");
-    const status = document.getElementById("status");
+    // const status = document.getElementById("status");
     const songTitle = document.getElementById("songTitle");
     const songSub = document.getElementById("songSub");
 
@@ -439,9 +492,9 @@
       return `${m}:${String(r).padStart(2, "0")}`;
     }
 
-    function setStatus(txt) {
-      status.textContent = txt;
-    }
+    // function setStatus(txt) {
+    //   status.textContent = txt;
+    // }
 
     function buildLyrics() {
       lyricsBox.innerHTML = "";
@@ -506,11 +559,24 @@
       if (idx === lastActiveIndex) return;
 
       const children = lyricsBox.children;
-      if (lastActiveIndex >= 0 && children[lastActiveIndex]) {
-        children[lastActiveIndex].classList.remove("active");
+
+      // Clear previous classes
+      for (let i = 0; i < children.length; i++) {
+        children[i].classList.remove("active", "near-1", "near-2");
       }
+
+      // Apply proximity-based classes
       if (children[idx]) {
         children[idx].classList.add("active");
+
+        // Adjacent lines get near-1 class
+        if (children[idx - 1]) children[idx - 1].classList.add("near-1");
+        if (children[idx + 1]) children[idx + 1].classList.add("near-1");
+
+        // Lines 2 away get near-2 class
+        if (children[idx - 2]) children[idx - 2].classList.add("near-2");
+        if (children[idx + 2]) children[idx + 2].classList.add("near-2");
+
         if (autoScroll) {
           const lineEl = children[idx];
           const boxHeight = lyricsBox.clientHeight;
@@ -539,7 +605,7 @@
         try {
           await audio.play();
         } catch (e) {
-          setStatus("Tap again to allow audio.");
+          // setStatus("Tap again to allow audio.");
           return;
         }
       } else {
@@ -572,11 +638,11 @@
 
     function updateVolIcon() {
       if (audio.volume === 0) {
-        volIcon.textContent = "🔇";
+        volIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
       } else if (audio.volume < 0.5) {
-        volIcon.textContent = "🔉";
+        volIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
       } else {
-        volIcon.textContent = "🔊";
+        volIcon.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
       }
     }
 
@@ -592,18 +658,18 @@
     });
 
     audio.addEventListener("loadedmetadata", () => {
-      setStatus("Loaded");
+      // setStatus("Loaded");
       updateTimeLabel();
     });
 
     audio.addEventListener("play", () => {
       playBtn.textContent = "⏸";
-      setStatus("Playing");
+      // setStatus("Playing");
     });
 
     audio.addEventListener("pause", () => {
       playBtn.textContent = "▶";
-      setStatus("Paused");
+      // setStatus("Paused");
     });
 
     audio.addEventListener("timeupdate", () => {
@@ -613,7 +679,7 @@
     });
 
     audio.addEventListener("ended", () => {
-      setStatus("Finished");
+      // setStatus("Finished");
       playBtn.textContent = "▶";
     });
 
